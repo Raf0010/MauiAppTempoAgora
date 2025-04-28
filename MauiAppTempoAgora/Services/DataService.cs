@@ -5,6 +5,7 @@ namespace MauiAppTempoAgora.Services
 {
     public class DataService
     {
+
         public static async Task <Tempo?> GetPrevisao(string Cidade) {
             Tempo? t = null;
             string chave = "0dd2f0b0aec202d4a722b2b033578b2b";
@@ -13,9 +14,11 @@ namespace MauiAppTempoAgora.Services
 
             using (HttpClient httpClient = new HttpClient())
             {
+                
                 HttpResponseMessage resp = await httpClient.GetAsync(url);
 
-                if (resp.IsSuccessStatusCode) { 
+                if (resp.IsSuccessStatusCode)
+                {
                     string json = await resp.Content.ReadAsStringAsync();
 
                     var rascunho = JObject.Parse(json);
@@ -37,6 +40,13 @@ namespace MauiAppTempoAgora.Services
                         speed = (double)rascunho["wind"]["speed"],
                         visibility = (int)rascunho["visibility"],
                     };
+                } else if (resp.StatusCode == System.Net.HttpStatusCode.NotFound)
+                    {
+                        throw new Exception("A cidade não foi encontrada");
+                    }
+                else if (resp.StatusCode == System.Net.HttpStatusCode.RequestTimeout)
+                {
+                    throw new Exception("Você está sem conexão com a internet");
                 }
             }
 
